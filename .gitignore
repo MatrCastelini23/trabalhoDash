@@ -1,0 +1,6 @@
+node_modules
+public
+.next
+AGENTS.md
+CLAUDE.md
+eslint.config.mjs
