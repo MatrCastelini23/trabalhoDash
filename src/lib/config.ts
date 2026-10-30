@@ -12,11 +12,15 @@ export const SPORT_LABELS: Record<Sport, string> = {
     cs: "Counter-Strike",
 };
 
-/** Valores do campo `competition` usados nos endpoints /standings. */
 export const COMPETITIONS = {
-    brasileirao: "brasileirao-serie-a",
-    csRanking: "cs-ranking",
+    brasileirao: "BSA",
+    championsLeague: "CL",
 } as const;
+
+export const SOCCER_COMPETITIONS = [COMPETITIONS.brasileirao, COMPETITIONS.championsLeague];
+
+// Janela de datas buscada na API: dá para montar "recentes", "ao vivo" e "próximas" com uma chamada por competição.
+export const MATCH_WINDOW_DAYS = { past: 10, future: 14 } as const;
 
 export const LIMITS = {
     upcoming: 8,

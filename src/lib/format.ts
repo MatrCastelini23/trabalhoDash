@@ -20,6 +20,7 @@ export function formatTime(iso: string): string {
 /** "Hoje", "Amanhã", "Ontem" ou "Sáb, 31 out". */
 export function formatDay(iso: string, now: Date = new Date()): string {
     const date = new Date(iso);
+    if (Number.isNaN(date.getTime())) return "";
     const diff = diffInDays(now, date);
     if (diff === 0) return "Hoje";
     if (diff === 1) return "Amanhã";

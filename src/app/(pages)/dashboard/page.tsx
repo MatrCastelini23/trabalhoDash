@@ -32,7 +32,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
     getRecentMatches(sport),
     showF1 ? getNextRace() : Promise.resolve({ data: undefined, error: false }),
     showFutebol ? getStandings(COMPETITIONS.brasileirao) : Promise.resolve({ data: [], error: false }),
-    showCs ? getStandings(COMPETITIONS.csRanking) : Promise.resolve({ data: [], error: false }),
+    Promise.resolve({ data: [], error: false }),
   ]);
 
   const liveResult = { ...live, data: filterByQuery(live.data, query) };
