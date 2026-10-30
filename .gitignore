@@ -4,3 +4,5 @@ public
 AGENTS.md
 CLAUDE.md
 eslint.config.mjs
+jsonserver
+.env
