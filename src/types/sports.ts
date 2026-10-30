@@ -12,6 +12,19 @@ export interface Team {
     logoUrl?: string;
 }
 
+export interface Championship {
+    id: string;
+    name: string;
+    logoUrl?: string;
+    startsAt?: string;
+    endsAt?: string;
+}
+
+export interface CsChampionships {
+    running: Championship[];
+    next?: Championship;
+}
+
 export interface Match {
     id: string;
     sport: Sport;

@@ -1,6 +1,7 @@
 import { getData } from "../lib/sports/apiSoccer";
 import { LIMITS, MATCH_WINDOW_DAYS, SOCCER_COMPETITIONS, TIMEZONE } from "../lib/config";
 import type { ApiResult, Match, MatchStatus, Sport, Team } from "../types/sports";
+import { getCsLiveMatches, getCsRecentMatches, getCsUpcomingMatches } from "./cs";
 
 interface ApiTeam { id: number; name: string; shortName?: string; tla?: string; crest?: string }
 interface ApiMatch {
@@ -75,30 +76,35 @@ async function loadSoccerMatches(): Promise<ApiResult<Match[]>> {
 const byStart = (dir: 1 | -1) => (a: Match, b: Match) =>
     dir * (Date.parse(a.startsAt) - Date.parse(b.startsAt));
 
-// Por enquanto só o futebol vem desta API; F1 e CS entram quando as outras APIs estiverem prontas.
-const isSoccer = (sport?: Sport) => !sport || sport === "futebol";
+const wantsSoccer = (sport?: Sport) => !sport || sport === "futebol";
+const wantsCs = (sport?: Sport) => !sport || sport === "cs";
 const empty: ApiResult<Match[]> = { data: [], error: false };
 
-export async function getLiveMatches(sport?: Sport): Promise<ApiResult<Match[]>> {
-    if (!isSoccer(sport)) return empty;
+async function soccerBy(sport: Sport | undefined, status: MatchStatus): Promise<ApiResult<Match[]>> {
+    if (!wantsSoccer(sport)) return empty;
     const res = await loadSoccerMatches();
-    return { ...res, data: res.data.filter((m) => m.status === "live").sort(byStart(1)) };
+    return { ...res, data: res.data.filter((m) => m.status === status) };
+}
+
+const csBy = (sport: Sport | undefined, load: () => Promise<ApiResult<Match[]>>) =>
+    wantsCs(sport) ? load() : Promise.resolve(empty);
+
+const merge = (results: ApiResult<Match[]>[]): ApiResult<Match[]> => ({
+    error: results.some((r) => r.error),
+    data: results.flatMap((r) => r.data),
+});
+
+export async function getLiveMatches(sport?: Sport): Promise<ApiResult<Match[]>> {
+    const res = merge(await Promise.all([soccerBy(sport, "live"), csBy(sport, getCsLiveMatches)]));
+    return { ...res, data: res.data.sort(byStart(1)) };
 }
 
 export async function getUpcomingMatches(sport?: Sport): Promise<ApiResult<Match[]>> {
-    if (!isSoccer(sport)) return empty;
-    const res = await loadSoccerMatches();
-    return {
-        ...res,
-        data: res.data.filter((m) => m.status === "scheduled").sort(byStart(1)).slice(0, LIMITS.upcoming),
-    };
+    const res = merge(await Promise.all([soccerBy(sport, "scheduled"), csBy(sport, getCsUpcomingMatches)]));
+    return { ...res, data: res.data.sort(byStart(1)).slice(0, LIMITS.upcoming) };
 }
 
 export async function getRecentMatches(sport?: Sport): Promise<ApiResult<Match[]>> {
-    if (!isSoccer(sport)) return empty;
-    const res = await loadSoccerMatches();
-    return {
-        ...res,
-        data: res.data.filter((m) => m.status === "finished").sort(byStart(-1)).slice(0, LIMITS.recent),
-    };
+    const res = merge(await Promise.all([soccerBy(sport, "finished"), csBy(sport, getCsRecentMatches)]));
+    return { ...res, data: res.data.sort(byStart(-1)).slice(0, LIMITS.recent) };
 }

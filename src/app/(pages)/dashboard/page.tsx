@@ -12,12 +12,14 @@ import { getStandings } from "@/src/services/standings";
 import { COMPETITIONS } from "@/src/lib/config";
 import { filterByQuery, parseSport } from "@/src/lib/filters";
 import { RecentSection } from "@/src/components/Dashboard/RecentSection";
+import { getCsChampionships } from "@/src/services/cs";
+import { ChampionshipCard } from "@/src/components/Dashboard/ChampionshipCard";
 // Placares ao vivo: sempre buscar dados novos a cada requisição.
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ sport?: string; q?: string }>;
 
-export default async function HomePage({ searchParams }: { searchParams: SearchParams }) {
+export default async function Dashboard({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const sport = parseSport(params.sport);
   const query = params.q?.trim() || undefined;
@@ -26,13 +28,13 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
   const showFutebol = !sport || sport === "futebol";
   const showCs = !sport || sport === "cs";
 
-  const [live, upcoming, recent, race, brasileirao, csRanking] = await Promise.all([
+  const [live, upcoming, recent, race, brasileirao, csChampionships] = await Promise.all([
     getLiveMatches(sport),
     getUpcomingMatches(sport),
     getRecentMatches(sport),
     showF1 ? getNextRace() : Promise.resolve({ data: undefined, error: false }),
     showFutebol ? getStandings(COMPETITIONS.brasileirao) : Promise.resolve({ data: [], error: false }),
-    Promise.resolve({ data: [], error: false }),
+    showCs ? getCsChampionships() : Promise.resolve({ data: {}, error: false }),
   ]);
 
   const liveResult = { ...live, data: filterByQuery(live.data, query) };
@@ -71,12 +73,8 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
               />
             )}
             {showCs && (
-              <StandingsCard
-                id="cs-title"
-                title="Ranking Counter-Strike"
-                linkLabel="Ver ranking"
-                result={csRanking}
-                pointsSuffix=" pts"
+              <ChampionshipCard
+                result={csChampionships}
               />
             )}
           </aside>

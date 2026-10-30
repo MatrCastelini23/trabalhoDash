@@ -12,6 +12,9 @@ export const SPORT_LABELS: Record<Sport, string> = {
     cs: "Counter-Strike",
 };
 
+export const CS_VIDEOGAME_TITLE = "cs-2";
+export const CS_FEATURED_LEAGUES: string[] = ["PGL Masters"];
+
 export const COMPETITIONS = {
     brasileirao: "BSA",
     championsLeague: "CL",

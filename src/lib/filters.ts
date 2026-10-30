@@ -7,7 +7,7 @@ export function parseSport(value?: string): Sport | undefined {
 
 export function buildHref({ sport, q }: { sport?: Sport; q?: string }): string {
     const params = new URLSearchParams();
-    if (sport) params.set("sport", sport);
+    if (sport) params.set("events", sport);
     if (q) params.set("q", q);
     const qs = params.toString();
     return qs ? `/?${qs}` : "/";
