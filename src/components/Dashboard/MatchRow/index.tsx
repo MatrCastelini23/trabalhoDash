@@ -48,7 +48,7 @@ export function MatchRow({ match, variant }: MatchRowProps) {
     const isUpcoming = variant === "upcoming";
 
     return (
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-line-soft px-5 py-4 last:border-b-0">
+        <div className="relative flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-line-soft px-5 py-4 transition last:border-b-0 hover:bg-surface">
             <div className="flex w-24 flex-none flex-col gap-0.5">
                 <span className="text-xs font-semibold text-muted">{formatDay(match.startsAt)}</span>
                 {isUpcoming ? (
@@ -65,22 +65,26 @@ export function MatchRow({ match, variant }: MatchRowProps) {
                 </span>
             </div>
 
-            {isUpcoming ? (
-                <button
-                    type="button"
-                    aria-label="Seguir esta partida"
-                    className="flex h-11 w-11 items-center justify-center rounded-xl border border-field bg-white text-brand hover:bg-brand-soft"
+            <div className="flex items-center gap-3">
+                {isUpcoming && (
+                    <button
+                        type="button"
+                        aria-label="Seguir esta partida"
+                        className="relative z-10 flex h-11 w-11 items-center justify-center rounded-xl border border-field bg-white text-brand hover:bg-brand-soft"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+                        </svg>
+                    </button>
+                )}
+                <Link
+                    href={`/partidas/${match.id}`}
+                    className="whitespace-nowrap text-[13px] font-semibold text-brand hover:text-brand-dark after:absolute after:inset-0"
                 >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                        <path d="M13.7 21a2 2 0 0 1-3.4 0" />
-                    </svg>
-                </button>
-            ) : (
-                <Link href={`/partidas/${match.id}`} className="whitespace-nowrap text-[13px] font-semibold text-brand hover:text-brand-dark">
-                    Resumo →
+                    {isUpcoming ? "Detalhes →" : "Resumo →"}
                 </Link>
-            )}
+            </div>
         </div>
     );
 }

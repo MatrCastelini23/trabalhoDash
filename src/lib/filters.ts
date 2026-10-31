@@ -1,6 +1,8 @@
 import type { Match, Sport } from "../types/sports"
 import { SPORTS } from "./config";
 
+export const isValidMatchId = (id: string) => /^(cs-)?\d+$/.test(id);
+
 export function parseSport(value?: string): Sport | undefined {
     return SPORTS.find((s) => s.key === value)?.key;
 }
@@ -10,7 +12,7 @@ export function buildHref({ sport, q }: { sport?: Sport; q?: string }): string {
     if (sport) params.set("events", sport);
     if (q) params.set("q", q);
     const qs = params.toString();
-    return qs ? `/?${qs}` : "/";
+    return qs ? `/dashboard?${qs}` : "/dashboard";
 }
 
 const normalize = (s: string) =>

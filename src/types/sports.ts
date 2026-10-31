@@ -2,6 +2,14 @@ export type Sport = "futebol" | "f1" | "cs";
 
 export type MatchStatus = "live" | "scheduled" | "finished";
 
+export type ApiErrorReason = "live-session";
+
+export interface ApiResult<T> {
+    data: T;
+    error: boolean;
+    reason?: ApiErrorReason;
+}
+
 export interface Team {
     id: string;
     name: string;
@@ -23,6 +31,13 @@ export interface Championship {
 export interface CsChampionships {
     running: Championship[];
     next?: Championship;
+    upcoming: Championship[];
+}
+
+export interface F1Standings {
+    afterRace?: string;
+    drivers: StandingRow[];
+    teams: StandingRow[];
 }
 
 export interface Match {
@@ -47,23 +62,67 @@ export interface Match {
     podium?: string[];
 }
 
-export interface Race {
+export interface MatchEvent {
     id: string;
-    name: string;
-    circuit: string;
-    startsAt: string;
+    minute?: string;
+    kind: "goal" | "yellow" | "red" | "sub";
+    team?: string;
+    text: string;
 }
 
+export interface RaceWeather {
+    temperatureC: number;
+    /** Código WMO do tempo (0 = céu limpo, 61 = chuva fraca...). */
+    code: number;
+    rainChance?: number; // %
+    windKmh?: number;
+}
+
+export interface MatchMap {
+    position: number;
+    status: "finished" | "running" | "pending";
+    winner?: string;
+}
+
+export interface MatchStream {
+    url: string;
+    language: string;
+    official: boolean;
+}
+export interface MatchDetail extends Match {
+    venue?: string;
+    attendance?: number;
+    referee?: string;
+    halfTime?: { home: number; away: number };
+    events: MatchEvent[]; // futebol
+    maps: MatchMap[]; // CS
+    streams: MatchStream[]; // CS
+}
+
+export interface Race {
+    id: string;
+    name: string; // "Brazilian Grand Prix"
+    circuit: string; // "Interlagos"
+    country: string;
+    /** Horário da largada da corrida (ISO 8601). */
+    startsAt: string;
+    weather?: RaceWeather;
+}
 export interface StandingRow {
     id: string;
-    /** Identifica a tabela/ranking (ex.: "brasileirao-serie-a"). */
+    /** Identifica a tabela/ranking (ex.: "BSA", "f1-drivers"). */
     competition: string;
     position: number;
     team: Team;
     played?: number;
     points: number;
+    /** Linha de apoio sob o nome (ex.: equipe de um piloto). */
+    subtitle?: string;
+    won?: number;
+    draw?: number;
+    lost?: number;
+    goalDifference?: number;
 }
-
 export interface ApiResult<T> {
     data: T;
     /** true quando a requisição falhou (API fora do ar, timeout etc.). */

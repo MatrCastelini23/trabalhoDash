@@ -7,7 +7,7 @@ import { CS_FEATURED_LEAGUES, CS_VIDEOGAME_TITLE } from "../lib/config";
 interface ApiOpponent {
     opponent: { id: number; name: string; acronym?: string | null; image_url?: string | null };
 }
-interface ApiCsMatch {
+export interface ApiCsMatch {
     id: number;
     name: string;
     status: string;
@@ -66,11 +66,11 @@ export async function getCsChampionships(): Promise<ApiResult<CsChampionships>> 
         error: running.error || upcoming.error,
         data: {
             running: featuredFirst(running.data).map(toChampionship),
+            upcoming: upcoming.data.slice(0, 10).map(toChampionship),
             next: next && toChampionship(next),
         },
     };
 }
-
 // ---------- partidas ----------
 
 function toStatus(s: string): MatchStatus | undefined {
@@ -87,7 +87,7 @@ const toTeam = (o: ApiOpponent["opponent"]): Team => ({
     logoUrl: o.image_url ?? undefined,
 });
 
-function toMatch(m: ApiCsMatch): Match | undefined {
+export function toMatch(m: ApiCsMatch): Match | undefined {
     const status = toStatus(m.status);
     const startsAt = status === "scheduled" ? (m.scheduled_at ?? m.begin_at) : (m.begin_at ?? m.scheduled_at);
     if (!status || !startsAt) return undefined;
@@ -136,3 +136,30 @@ async function fetchMatches(kind: "running" | "upcoming" | "past", sort: string)
 export const getCsLiveMatches = () => fetchMatches("running", "begin_at");
 export const getCsUpcomingMatches = () => fetchMatches("upcoming", "scheduled_at");
 export const getCsRecentMatches = () => fetchMatches("past", "-begin_at");
+
+export interface CsSerieMatches {
+    live: Match[];
+    upcoming: Match[];
+    recent: Match[];
+}
+
+export async function getCsSerieMatches(serieId: number): Promise<ApiResult<CsSerieMatches>> {
+    const res = await getCsList<ApiCsMatch>("/csgo/matches", {
+        sort: "-scheduled_at",
+        per_page: 100,
+        ...titleFilter,
+        "filter[serie_id]": serieId,
+    });
+
+    const all = res.data.flatMap((m) => toMatch(m) ?? []);
+    const byStart = (dir: 1 | -1) => (a: Match, b: Match) => dir * (Date.parse(a.startsAt) - Date.parse(b.startsAt));
+
+    return {
+        error: res.error,
+        data: {
+            live: all.filter((m) => m.status === "live").sort(byStart(1)),
+            upcoming: all.filter((m) => m.status === "scheduled").sort(byStart(1)).slice(0, 20),
+            recent: all.filter((m) => m.status === "finished").sort(byStart(-1)).slice(0, 10),
+        },
+    };
+}

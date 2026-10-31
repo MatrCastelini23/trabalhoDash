@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
+import { AuthGuard } from "@/src/components/auth/AuthGuard";
 
 export default function Home() {
-
-  redirect("dashboard")
+  return <AuthGuard />;
 }

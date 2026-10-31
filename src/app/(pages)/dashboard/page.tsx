@@ -34,7 +34,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Search
     getRecentMatches(sport),
     showF1 ? getNextRace() : Promise.resolve({ data: undefined, error: false }),
     showFutebol ? getStandings(COMPETITIONS.brasileirao) : Promise.resolve({ data: [], error: false }),
-    showCs ? getCsChampionships() : Promise.resolve({ data: {}, error: false }),
+    showCs ? getCsChampionships() : Promise.resolve({ data: { running: [], upcoming: [] }, error: false }),
   ]);
 
   const liveResult = { ...live, data: filterByQuery(live.data, query) };

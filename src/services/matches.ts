@@ -4,7 +4,8 @@ import type { ApiResult, Match, MatchStatus, Sport, Team } from "../types/sports
 import { getCsLiveMatches, getCsRecentMatches, getCsUpcomingMatches } from "./cs";
 
 interface ApiTeam { id: number; name: string; shortName?: string; tla?: string; crest?: string }
-interface ApiMatch {
+
+export interface ApiMatch {
     id: number;
     utcDate: string;
     status: string;
@@ -33,7 +34,7 @@ const toTeam = (t: ApiTeam): Team => ({
     logoUrl: t.crest,
 });
 
-function toMatch(m: ApiMatch): Match | undefined {
+export function toMatch(m: ApiMatch): Match | undefined {
     const status = toStatus(m.status);
     if (!status) return undefined;
 
@@ -99,9 +100,12 @@ export async function getLiveMatches(sport?: Sport): Promise<ApiResult<Match[]>>
     return { ...res, data: res.data.sort(byStart(1)) };
 }
 
-export async function getUpcomingMatches(sport?: Sport): Promise<ApiResult<Match[]>> {
+export async function getUpcomingMatches(
+    sport?: Sport,
+    limit: number = LIMITS.upcoming,
+): Promise<ApiResult<Match[]>> {
     const res = merge(await Promise.all([soccerBy(sport, "scheduled"), csBy(sport, getCsUpcomingMatches)]));
-    return { ...res, data: res.data.sort(byStart(1)).slice(0, LIMITS.upcoming) };
+    return { ...res, data: res.data.sort(byStart(1)).slice(0, limit) };
 }
 
 export async function getRecentMatches(sport?: Sport): Promise<ApiResult<Match[]>> {

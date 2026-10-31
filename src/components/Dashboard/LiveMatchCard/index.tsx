@@ -39,6 +39,7 @@ export function LiveMatchCard({ match }: { match: Match }) {
                     Detalhes →
                 </Link>
             </div>
+            <Link href={`/partidas/${match.id}`} className="whitespace-nowrap text-[13px] font-semibold text-brand hover:text-brand-dark after:absolute after:inset-0"></Link>
         </article>
     );
 }

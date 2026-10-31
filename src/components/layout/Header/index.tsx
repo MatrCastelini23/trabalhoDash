@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Sport } from "@/src/types/sports";
-import { SPORTS } from "@/src/lib/config";
-import { buildHref } from "@/src/lib/filters"
+import { SPORTS, sportPath } from "@/src/lib/config";
+import { NavLink } from "../NavLink";
 
 interface HeaderProps {
     activeSport?: Sport;
@@ -34,21 +34,10 @@ export function Header({ activeSport, query }: HeaderProps) {
                 <Logo />
 
                 <nav aria-label="Principal" className="flex flex-1 flex-wrap gap-x-2 gap-y-1">
-                    <Link href="/" className={`${linkBase} ${!activeSport ? active : idle}`}>
-                        Início
-                    </Link>
+                    <NavLink href="/dashboard">Início</NavLink>
                     {SPORTS.map((s) => (
-                        <Link
-                            key={s.key}
-                            href={buildHref({ sport: s.key })}
-                            className={`${linkBase} ${activeSport === s.key ? active : idle}`}
-                        >
-                            {s.label}
-                        </Link>
+                        <NavLink key={s.key} href={sportPath(s.key)}>{s.label}</NavLink>
                     ))}
-                    <Link href="#" className={`${linkBase} ${idle}`}>
-                        Calendário
-                    </Link>
                 </nav>
 
                 <div className="flex flex-wrap items-center gap-3">

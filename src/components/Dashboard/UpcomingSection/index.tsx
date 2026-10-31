@@ -3,12 +3,16 @@ import { SectionHeader } from "../../ui/SectionHeader";
 import { EmptyState } from "../../ui/EmptyState";
 import { MatchRow } from "../MatchRow";
 
-export function UpcomingSection({ result }: { result: ApiResult<Match[]> }) {
+export function UpcomingSection({
+    result,
+    title = "Proximas Partidas",
+    linkLabel = "Abrir Calendario",
+}: { result: ApiResult<Match[]>; title?: string; linkLabel?: string }) {
     const { data, error } = result;
 
     return (
         <section aria-labelledby="next-title" className="flex flex-col gap-4">
-            <SectionHeader id="next-title" title="Próximas partidas" linkLabel="Abrir calendário" />
+            <SectionHeader id="next-title" title={title} linkLabel={linkLabel} />
             {data.length === 0 ? (
                 <EmptyState error={error} message="Nenhuma partida agendada." />
             ) : (

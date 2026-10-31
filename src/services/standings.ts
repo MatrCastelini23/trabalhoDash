@@ -6,14 +6,17 @@ interface ApiRow {
     position: number;
     team: { id: number; name: string; shortName?: string; tla?: string; crest?: string };
     playedGames: number;
+    won: number;
+    draw: number;
+    lost: number;
     points: number;
+    goalDifference: number;
 }
 interface ApiStandings {
     standings: { type: string; table: ApiRow[] }[];
 }
 
-/** GET /competitions/{code}/standings — devolve o topo da tabela TOTAL. */
-export async function getStandings(code: string): Promise<ApiResult<StandingRow[]>> {
+export async function getStandings(code: string, limit: number = LIMITS.standings): Promise<ApiResult<StandingRow[]>> {
     const res = await getData<ApiStandings>(`/competitions/${code}/standings`);
     const groups = res.data?.standings ?? [];
     const table = (groups.find((g) => g.type === "TOTAL") ?? groups[0])?.table ?? [];
@@ -29,8 +32,12 @@ export async function getStandings(code: string): Promise<ApiResult<StandingRow[
             logoUrl: r.team.crest,
         },
         played: r.playedGames,
+        won: r.won,
+        draw: r.draw,
+        lost: r.lost,
+        goalDifference: r.goalDifference,
         points: r.points,
     }));
 
-    return { error: res.error, data: rows.sort((a, b) => a.position - b.position).slice(0, LIMITS.standings) };
+    return { error: res.error, data: rows.sort((a, b) => a.position - b.position).slice(0, limit) };
 }
